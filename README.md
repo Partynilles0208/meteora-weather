@@ -37,13 +37,3 @@ Die `.env` Datei wird von Git ignoriert.
 ```bash
 npm run check
 ```
-
-## GitHub
-
-Dieses Projekt ist fuer GitHub vorbereitet. Nach dem ersten Commit kannst du ein leeres Repository auf GitHub erstellen und den Remote setzen:
-
-```bash
-git remote add origin https://github.com/DEIN-NAME/meteora-weather.git
-git branch -M main
-git push -u origin main
-```
