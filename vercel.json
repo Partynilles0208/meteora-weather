@@ -1,16 +1,16 @@
 {
   "version": 2,
-  "routes": [
+  "buildCommand": null,
+  "outputDirectory": ".",
+  "functions": {
+    "api/chat.js": {
+      "runtime": "nodejs22.x"
+    }
+  },
+  "rewrites": [
     {
-      "src": "/api/chat",
-      "dest": "/api/chat.js"
-    },
-    {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/((?!api/.*|assets/.*|.*\\..*).*)",
+      "destination": "/index.html"
     }
   ]
 }
