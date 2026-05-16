@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Meteora Weather</title>
+    <link rel="preconnect" href="https://api.open-meteo.com" />
+    <link rel="preconnect" href="https://geocoding-api.open-meteo.com" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="phone-shell">
+      <section class="weather-app">
+        <div class="cloud-pane" id="cloudPane" aria-hidden="true"></div>
+        <div class="rain-pane" id="rainPane" aria-hidden="true"></div>
+        <div class="lightning-pane" aria-hidden="true"></div>
+
+        <header class="status-bar" aria-label="Status">
+          <span>9:41</span>
+          <div class="status-icons">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </header>
+
+        <nav class="hero-nav" aria-label="App Navigation">
+          <button class="icon-button ghost" id="menuButton" type="button" aria-label="Menu">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+          </button>
+          <div class="year-badge">2026</div>
+          <button class="icon-button ghost" id="soundButton" type="button" title="Wettersound einschalten" aria-label="Wettersound einschalten" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M11 5 6 9H3v6h3l5 4V5Z" />
+              <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+              <path d="M18.5 5.5a9 9 0 0 1 0 13" />
+            </svg>
+          </button>
+        </nav>
+
+        <form class="location-row" id="searchForm">
+          <button class="location-pin" id="geoButton" type="button" aria-label="Aktuellen Standort nutzen">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 3 9 7 2-7 2-3 7-2-7-8-2 8-2 2-9Z" /></svg>
+          </button>
+          <label class="sr-only" for="cityInput">Stadt oder Koordinaten suchen</label>
+          <input id="cityInput" name="city" type="search" autocomplete="off" value="New York City" placeholder="Stadt oder 52.52, 13.405" aria-label="Stadt oder Koordinaten suchen" />
+          <div class="suggestions-panel" id="suggestionsPanel" role="listbox" aria-label="Ortsvorschläge"></div>
+          <button class="icon-button search-button" type="submit" aria-label="Suchen">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-5.2-5.2M10.8 18a7.2 7.2 0 1 1 0-14.4 7.2 7.2 0 0 1 0 14.4Z" /></svg>
+          </button>
+        </form>
+        <p class="country" id="countryName">United States</p>
+
+        <section class="hero-weather home-view" aria-label="Aktuelles Wetter">
+          <div>
+            <div class="temperature"><span id="currentTemp">--</span><span>°</span></div>
+            <p class="condition" id="conditionText">--</p>
+            <p class="feels">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 14.8V5a2 2 0 1 0-4 0v9.8a4 4 0 1 0 4 0Z" /></svg>
+              Feels Like <strong id="feelsLike">--</strong>°
+            </p>
+            <div class="hi-lo">
+              <span>↑ <strong id="highTemp">--</strong>°</span>
+              <span>↓ <strong id="lowTemp">--</strong>°</span>
+            </div>
+          </div>
+
+          <aside class="glass-card mini-forecast">
+            <div class="weather-art" id="weatherArt" aria-hidden="true"></div>
+            <strong><span id="miniLow">--</span>°/<span id="miniHigh">--</span>°</strong>
+            <span id="miniCondition">--</span>
+            <hr />
+            <p>Rain: <span id="rainChance">--</span>%</p>
+            <p>Wind: <span id="miniWind">--</span> <span id="miniWindUnit">km/h</span></p>
+          </aside>
+        </section>
+
+        <p class="status home-view" id="statusText" role="status">Lade Wetterdaten...</p>
+
+        <section class="classic-home home-view" id="classicHome" aria-label="Klassische Wetteransicht">
+          <header class="classic-topbar">
+            <span class="classic-app-icon" aria-hidden="true"></span>
+            <strong id="classicAppTitle">Wetter in New York City</strong>
+            <button class="classic-round-button" id="classicSearchButton" type="button" aria-label="Suchen">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-5.2-5.2M10.8 18a7.2 7.2 0 1 1 0-14.4 7.2 7.2 0 0 1 0 14.4Z" /></svg>
+            </button>
+            <button class="classic-round-button" id="classicSettingsButton" type="button" aria-label="Einstellungen">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" /><path d="M19.4 15a1.8 1.8 0 0 0 .36 1.98l.05.05a2 2 0 1 1-2.83 2.83l-.05-.05A1.8 1.8 0 0 0 15 19.4a1.8 1.8 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.08A1.8 1.8 0 0 0 9 19.4a1.8 1.8 0 0 0-1.98.36l-.05.05A2 2 0 1 1 4.2 17l.05-.05A1.8 1.8 0 0 0 4.6 15a1.8 1.8 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.08A1.8 1.8 0 0 0 4.6 9a1.8 1.8 0 0 0-.36-1.98l-.05-.05A2 2 0 1 1 7.02 4.14l.05.05A1.8 1.8 0 0 0 9 4.6a1.8 1.8 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.08a1.8 1.8 0 0 0 1 1.52 1.8 1.8 0 0 0 1.98-.36l.05-.05A2 2 0 1 1 19.86 7l-.05.05A1.8 1.8 0 0 0 19.4 9c.33.6.96.98 1.6 1H21a2 2 0 1 1 0 4h-.08A1.8 1.8 0 0 0 19.4 15Z" /></svg>
+            </button>
+          </header>
+          <section class="classic-search-panel" id="classicSearchPanel" aria-label="Ort suchen">
+            <form id="classicSearchForm">
+              <label class="sr-only" for="classicSearchInput">Stadt suchen</label>
+              <input id="classicSearchInput" type="search" autocomplete="off" placeholder="Stadt suchen" />
+            </form>
+            <div class="classic-search-results" id="classicSearchResults"></div>
+          </section>
+          <section class="classic-favorites" id="classicFavorites" aria-label="Favoriten"></section>
+          <div class="classic-hero">
+            <div class="classic-current">
+              <h1 id="classicPlace">New York City</h1>
+              <strong><span id="classicTemp">--</span>°C</strong>
+              <p id="classicCondition">--</p>
+              <time id="classicTime">Samstag, --:--</time>
+            </div>
+            <div class="classic-weather-visual" aria-hidden="true"></div>
+          </div>
+          <div class="classic-stats">
+            <article>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8c4 3 8 3 12 0M4 13c4 3 8 3 12 0M4 18c4 3 8 3 12 0" /></svg>
+              <span>Wind</span>
+              <strong><span id="classicWind">--</span><small> km/h</small></strong>
+              <em id="classicWindDirection">aus --</em>
+            </article>
+            <article>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s6 6.2 6 11a6 6 0 0 1-12 0c0-4.8 6-11 6-11Z" /></svg>
+              <span>Luftfeuchtigkeit</span>
+              <strong><span id="classicHumidity">--</span><small>%</small></strong>
+            </article>
+            <article>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 14.8V5a2 2 0 1 0-4 0v9.8a4 4 0 1 0 4 0Z" /></svg>
+              <span>Gefühlt</span>
+              <strong><span id="classicFeels">--</span><small>°C</small></strong>
+            </article>
+            <article>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.5 18H8a5 5 0 1 1 1.4-9.8A6 6 0 0 1 21 10.5 3.8 3.8 0 0 1 17.5 18Z" /><path d="M8 21h.01M12 21h.01" /></svg>
+              <span>Regenchance</span>
+              <strong><span id="classicRain">--</span><small>%</small></strong>
+            </article>
+          </div>
+          <div class="classic-hourly" id="classicHourly" aria-label="Klassische Stundenansicht"></div>
+        </section>
+
+        <section class="glass-card alert-card home-view" id="alertCard" role="button" tabindex="0" aria-expanded="false">
+          <div class="alert-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8v5M12 17h.01" /><path d="m10.2 3.9-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.8-3.1l-8-14a2 2 0 0 0-3.6 0Z" /></svg>
+          </div>
+          <div>
+            <strong id="alertTitle">Weather Alert</strong>
+            <p id="alertText">Aktuelle Vorhersage wird geprüft.</p>
+            <div class="warning-list" id="warningList"></div>
+          </div>
+          <span class="chevron">›</span>
+        </section>
+
+        <section class="glass-card hourly-strip home-view" id="hourlyStrip" aria-label="Stündliche Vorhersage"></section>
+
+        <section class="content-grid home-view">
+          <div class="glass-card daily-list" id="dailyList" aria-label="Tägliche Vorhersage"></div>
+
+          <div class="side-grid">
+            <article class="glass-card wind-card">
+              <span>Wind</span>
+              <div class="wind-visual">
+                <video class="wind-video" src="PixVerse_V6_Image_Text_360P_ich_will_das_es_si.mp4" autoplay muted loop playsinline preload="auto" aria-hidden="true" tabindex="-1"></video>
+                <strong><span id="windValue">--</span><small id="windUnit">km/h</small></strong>
+                <em id="windDirection">SW</em>
+              </div>
+            </article>
+            <article class="glass-card gauge-card">
+              <span>Humidity</span>
+              <strong id="humidityValue">--%</strong>
+            </article>
+            <article class="glass-card gauge-card uv">
+              <span>UV Index</span>
+              <strong id="uvValue">--</strong>
+              <small id="uvLabel">--</small>
+            </article>
+            <article class="glass-card air-card">
+              <span>Air Quality</span>
+              <strong><span id="airQualityValue">--</span> <small id="airQualityLabel">--</small></strong>
+              <video class="leaf-video" src="Video Project (1).mp4" autoplay muted loop playsinline preload="auto" aria-hidden="true" tabindex="-1"></video>
+            </article>
+            <article class="glass-card detail-card">
+              <span>Pressure</span>
+              <strong><span id="pressureValue">--</span><small>hPa</small></strong>
+            </article>
+            <article class="glass-card detail-card">
+              <span>Visibility</span>
+              <strong><span id="visibilityValue">--</span><small>km</small></strong>
+            </article>
+            <article class="glass-card detail-card">
+              <span>Rain Now</span>
+              <strong><span id="precipValue">--</span><small>mm</small></strong>
+            </article>
+            <article class="glass-card detail-card">
+              <span>Clouds</span>
+              <strong><span id="cloudValue">--</span><small>%</small></strong>
+            </article>
+            <article class="glass-card sun-card">
+              <span>Sun</span>
+              <div>
+                <strong id="sunriseValue">--</strong>
+                <strong id="sunsetValue">--</strong>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="radar-view" id="radarView" aria-label="Wetterradar">
+          <div class="radar-head">
+            <div>
+              <span>Satellit / Regen</span>
+              <h2 id="radarPlace">New York</h2>
+            </div>
+            <div class="radar-actions">
+              <button class="icon-button radar-control" id="radarRefresh" type="button" aria-label="Radar aktualisieren">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36" /><path d="M21 4v8h-8" /></svg>
+              </button>
+              <button class="icon-button radar-control" id="radarRecenter" type="button" aria-label="Radar auf Ort zentrieren">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v3M12 19v3M2 12h3M19 12h3" /><path d="M12 19a7 7 0 1 0 0-14 7 7 0 0 0 0 14Z" /></svg>
+              </button>
+              <button class="icon-button radar-control" id="radarPlay" type="button" aria-label="Radar Animation starten">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7-11-7Z" /></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="glass-card radar-card">
+            <div class="radar-map" id="radarMap">
+              <div class="radar-tiles base" id="baseTiles"></div>
+              <div class="radar-tiles overlay" id="radarTiles"></div>
+              <div class="radar-scope" aria-hidden="true"></div>
+              <div class="radar-blips" aria-hidden="true">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+              <div class="radar-crosshair"></div>
+              <div class="radar-sweep"></div>
+              <div class="radar-loading" id="radarLoading">Lade Radar...</div>
+              <button class="icon-button radar-fullscreen-button" id="radarFullscreen" type="button" aria-label="Radar im Vollbild öffnen" title="Vollbild">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M8 3H3v5" />
+                  <path d="M16 3h5v5" />
+                  <path d="M21 16v5h-5" />
+                  <path d="M3 16v5h5" />
+                </svg>
+              </button>
+            </div>
+            <div class="radar-info">
+              <div>
+                <span>Frame</span>
+                <strong id="radarTime">--</strong>
+              </div>
+              <div>
+                <span>Zoom</span>
+                <strong id="radarZoomLabel">6</strong>
+              </div>
+              <div>
+                <span>Status</span>
+                <strong>Satellit</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass-card radar-timeline">
+            <input id="radarSlider" type="range" min="0" max="0" value="0" aria-label="Radar Zeitpunkt" />
+            <div class="radar-zoom">
+              <button id="radarZoomOut" type="button">−</button>
+              <span id="radarFrameCount">0 Frames</span>
+              <button id="radarZoomIn" type="button">+</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="map-view" id="mapView" aria-label="Karte">
+          <div class="radar-head">
+            <div>
+              <span>Map</span>
+              <h2 id="mapPlace">New York</h2>
+            </div>
+            <div class="radar-actions">
+              <button class="icon-button radar-control" id="mapZoomOut" type="button" aria-label="Karte verkleinern">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" /></svg>
+              </button>
+              <button class="icon-button radar-control" id="mapRecenter" type="button" aria-label="Karte auf Ort zentrieren">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v3M12 19v3M2 12h3M19 12h3" /><path d="M12 19a7 7 0 1 0 0-14 7 7 0 0 0 0 14Z" /></svg>
+              </button>
+              <button class="icon-button radar-control" id="mapZoomIn" type="button" aria-label="Karte vergrößern">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+              </button>
+            </div>
+          </div>
+          <div class="glass-card map-card">
+            <div class="radar-map simple-map" id="simpleMap">
+              <div class="radar-tiles base" id="mapTiles"></div>
+              <div class="map-pin">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-5.2 7-12A7 7 0 1 0 5 9c0 6.8 7 12 7 12Z" /><path d="M12 11.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" /></svg>
+              </div>
+            </div>
+            <div class="map-stats">
+              <article>
+                <span>Lat</span>
+                <strong id="mapLat">--</strong>
+              </article>
+              <article>
+                <span>Lon</span>
+                <strong id="mapLon">--</strong>
+              </article>
+              <article>
+                <span>Zoom</span>
+                <strong id="mapZoomLabel">6</strong>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="settings-view" id="settingsView" aria-label="Einstellungen">
+          <div class="radar-head">
+            <div>
+              <span>Settings</span>
+              <h2>Preferences</h2>
+            </div>
+          </div>
+          <div class="settings-grid">
+            <article class="glass-card setting-row">
+              <div>
+                <strong>Wettersound</strong>
+                <span>Regen- und Wolken-Ambience</span>
+              </div>
+              <button class="toggle-button" id="settingsSound" type="button" aria-pressed="false"><span></span></button>
+            </article>
+            <article class="glass-card setting-row">
+              <div>
+                <strong>Animationen</strong>
+                <span>Tropfen, Wolken und Radar-Sweep</span>
+              </div>
+              <button class="toggle-button is-on" id="settingsAnimations" type="button" aria-pressed="true"><span></span></button>
+            </article>
+            <article class="glass-card setting-row">
+              <div>
+                <strong>Design</strong>
+                <span id="designLabel">Modernes Gewitter</span>
+              </div>
+              <button class="seg-button" id="designButton" type="button">Modern</button>
+            </article>
+            <article class="glass-card setting-row">
+              <div>
+                <strong>Einheiten</strong>
+                <span id="unitLabel">Celsius / km/h</span>
+              </div>
+              <button class="seg-button" id="unitButton" type="button">Metric</button>
+            </article>
+            <article class="glass-card setting-row">
+              <div>
+                <strong>Sprache</strong>
+                <span id="languageLabel">Deutsch</span>
+              </div>
+              <button class="seg-button" id="languageButton" type="button">DE</button>
+            </article>
+            <article class="glass-card setting-row">
+              <div>
+                <strong>Standortzugriff</strong>
+                <span>Nur nach deiner Browser-Freigabe</span>
+              </div>
+              <button class="seg-button" id="privacyLocate" type="button">Prüfen</button>
+            </article>
+            <article class="glass-card setting-row">
+              <div>
+                <strong>Aktueller Ort</strong>
+                <span id="settingsLocation">--</span>
+              </div>
+              <button class="seg-button" id="settingsLocate" type="button">Locate</button>
+            </article>
+            <article class="glass-card privacy-card">
+              <span>Datenschutz</span>
+              <h3>Datenschutzerklärung</h3>
+              <p>Diese Wetter-App verarbeitet den eingegebenen Ort, ausgewählte Koordinaten und geladene Wetterdaten, um Vorhersage, Radar, Karte, Luftqualität, Warnungen und den Wetter-Chat anzuzeigen.</p>
+              <p>Wenn du den Standort-Button nutzt, fragt der Browser zuerst nach deiner Erlaubnis. Ohne Zustimmung wird kein genauer Gerätestandort abgefragt.</p>
+              <p>Der Wetter-Chat sendet deine Chatnachrichten zusammen mit dem aktuellen Wetterkontext an den lokalen Server dieser App. Der KI-Key bleibt serverseitig und wird nicht an den Browser ausgeliefert.</p>
+              <p>Diese lokale Demo-App legt keine Nutzerkonten an, verkauft keine Daten und speichert keinen Chatverlauf dauerhaft. Externe Wetter-, Karten- und Radarverbindungen können technisch notwendige Verbindungsdaten erhalten.</p>
+            </article>
+          </div>
+        </section>
+
+        <aside class="menu-panel glass-card" id="menuPanel" aria-label="Menu">
+          <button class="icon-button menu-close" id="menuClose" type="button" aria-label="Menu schließen">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" /></svg>
+          </button>
+          <div class="menu-brand">
+            <span>Meteora</span>
+            <strong id="menuLocation">New York</strong>
+          </div>
+          <div class="menu-links">
+            <button data-menu-view="home" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8" /><path d="M5 10v10h14V10" /></svg>
+              Home
+            </button>
+            <button data-menu-view="radar" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z" /><path d="M12 12h6" /></svg>
+              Radar
+            </button>
+            <button data-menu-view="chat" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v8Z" /></svg>
+              Wetter Chat
+            </button>
+            <button data-menu-view="map" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18-6 3V6l6-3 6 3 6-3v15l-6 3-6-3Z" /></svg>
+              Karte
+            </button>
+            <button data-menu-view="settings" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" /><path d="M19.4 15a1.8 1.8 0 0 0 .36 1.98l.05.05a2 2 0 1 1-2.83 2.83l-.05-.05A1.8 1.8 0 0 0 15 19.4a1.8 1.8 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.08A1.8 1.8 0 0 0 9 19.4a1.8 1.8 0 0 0-1.98.36l-.05.05a2 2 0 1 1-2.83-2.83l.05-.05A1.8 1.8 0 0 0 4.6 15a1.8 1.8 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.08A1.8 1.8 0 0 0 4.6 9a1.8 1.8 0 0 0-.36-1.98l-.05-.05a2 2 0 1 1 2.83-2.83l.05.05A1.8 1.8 0 0 0 9 4.6a1.8 1.8 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.08a1.8 1.8 0 0 0 1 1.52 1.8 1.8 0 0 0 1.98-.36l.05-.05a2 2 0 1 1 2.83 2.83l-.05.05A1.8 1.8 0 0 0 19.4 9c.33.6.96.98 1.6 1H21a2 2 0 1 1 0 4h-.08A1.8 1.8 0 0 0 19.4 15Z" /></svg>
+              Settings
+            </button>
+          </div>
+          <a class="ehoser-link" href="https://ehoser.de" target="_blank" rel="noopener noreferrer">
+            <span>Ehoser</span>
+            <strong>ehoser.de</strong>
+          </a>
+        </aside>
+
+        <footer class="bottom-nav" aria-label="Hauptnavigation">
+          <button class="active" id="homeTab" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8" /><path d="M5 10v10h14V10" /></svg>
+            Home
+          </button>
+          <button id="radarTab" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z" /><path d="M12 12h6" /></svg>
+            Radar
+          </button>
+          <button class="center-weather" id="centerWeatherButton" type="button" aria-label="Wetter Chat öffnen">
+            <span class="weather-art rain" aria-hidden="true"></span>
+          </button>
+          <button id="mapTab" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18-6 3V6l6-3 6 3 6-3v15l-6 3-6-3Z" /></svg>
+            Map
+          </button>
+          <button id="settingsTab" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" /><path d="M19.4 15a1.8 1.8 0 0 0 .36 1.98l.05.05a2 2 0 1 1-2.83 2.83l-.05-.05A1.8 1.8 0 0 0 15 19.4a1.8 1.8 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.08A1.8 1.8 0 0 0 9 19.4a1.8 1.8 0 0 0-1.98.36l-.05.05a2 2 0 1 1-2.83-2.83l.05-.05A1.8 1.8 0 0 0 4.6 15a1.8 1.8 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.08A1.8 1.8 0 0 0 4.6 9a1.8 1.8 0 0 0-.36-1.98l-.05-.05a2 2 0 1 1 2.83-2.83l.05.05A1.8 1.8 0 0 0 9 4.6a1.8 1.8 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.08a1.8 1.8 0 0 0 1 1.52 1.8 1.8 0 0 0 1.98-.36l.05-.05a2 2 0 1 1 2.83 2.83l-.05.05A1.8 1.8 0 0 0 19.4 9c.33.6.96.98 1.6 1H21a2 2 0 1 1 0 4h-.08A1.8 1.8 0 0 0 19.4 15Z" /></svg>
+            Settings
+          </button>
+        </footer>
+
+        <section class="chat-view" id="chatPanel" aria-label="Wetter Chat" aria-hidden="true">
+          <header class="chat-head">
+            <div>
+              <span>Weather AI</span>
+              <strong>Wetter Chat</strong>
+            </div>
+          </header>
+          <div class="chat-messages glass-card" id="chatMessages" aria-live="polite">
+            <article class="chat-message assistant">
+              Frag mich nach dem Wetter, Radar, Regenrisiko, Wind, Luftqualität oder amtlichen Warnungen für den aktuellen Ort.
+            </article>
+          </div>
+          <form class="chat-form glass-card" id="chatForm">
+            <label class="sr-only" for="chatInput">Nachricht an Wetter Chat</label>
+            <input id="chatInput" type="text" placeholder="z.B. Muss ich heute mit Gewitter rechnen?" autocomplete="off" />
+            <button type="submit">Senden</button>
+          </form>
+        </section>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>

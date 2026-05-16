@@ -1,0 +1,18 @@
+{
+  "name": "meteora-weather",
+  "version": "1.0.0",
+  "description": "Lokale Wetter-App mit mehreren Designs, Radar/Karte, Offline-Cache und Wetter-Chat.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js && node --check app.js"
+  },
+  "keywords": [
+    "weather",
+    "wetter",
+    "webview",
+    "offline",
+    "radar"
+  ],
+  "license": "MIT"
+}
