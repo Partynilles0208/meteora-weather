@@ -2,11 +2,6 @@
   "version": 2,
   "buildCommand": null,
   "outputDirectory": ".",
-  "functions": {
-    "api/chat.js": {
-      "runtime": "nodejs22.x"
-    }
-  },
   "rewrites": [
     {
       "source": "/((?!api/.*|assets/.*|.*\\..*).*)",
