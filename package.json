@@ -4,6 +4,7 @@
   "description": "Lokale Wetter-App mit mehreren Designs, Radar/Karte, Offline-Cache und Wetter-Chat.",
   "main": "server.js",
   "scripts": {
+    "build": "node scripts/build.js",
     "start": "node server.js",
     "check": "node --check server.js && node --check app.js"
   },
