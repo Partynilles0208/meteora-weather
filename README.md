@@ -37,3 +37,15 @@ Die `.env` Datei wird von Git ignoriert.
 ```bash
 npm run check
 ```
+
+## Vercel
+
+Das Projekt laeuft auf Vercel als statische App plus Serverless Function unter `/api/chat`.
+
+Setze in Vercel unter **Settings -> Environment Variables**:
+
+```text
+GROQ_API_KEY=dein_key
+```
+
+Danach einen neuen Deploy starten.
